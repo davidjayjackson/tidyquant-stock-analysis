@@ -11,10 +11,12 @@ library(tidyverse)
 library(tidyquant)
 library(scales)
 library(plotly)
+library(lubridate)
 ```
 ```{r}
 ET <- tq_get("ET", get = "stock.prices", from = " 1990-01-01")
 ```
+
 # Begin Data Viz
 
 ```{R}
@@ -22,6 +24,79 @@ ggplot(ET) + geom_line(aes(x=date,y=open)) +
   labs(title="Energy Transfer Opening Stock Price")
 
 ```
+# Plot Election Years
+
+```{r}
+# Load necessary libraries
+library(lubridate)
+library(ggplot2)
+
+# Ensure 'prez' is numeric
+prez <- c(1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020, 2024)
+
+# Filter dataset for only the years in 'prez'
+filtered_ET <- ET |> filter(Yr %in% prez)
+
+# Create a new column for the day of the year (to handle continuous x-axis)
+filtered_ET <- filtered_ET |> mutate(day_of_year = yday(date))
+
+# Create the plot for year-over-year analysis with shading for November
+ggplot(filtered_ET, aes(x=day_of_year, y=close, color=factor(Yr), group=Yr)) +
+  geom_line() +
+  
+  # Use annotate to add a shaded rectangle for November (days 305 to 334)
+  annotate("rect", xmin = 305, xmax = 334, ymin = -Inf, ymax = Inf, fill = "gray", alpha = 0.1) +
+  
+  # Turn off x-axis labels
+  theme(axis.text.x = element_blank()) +
+  
+  labs(title = "Year-over-Year Stock Close Price",
+       x = "Day of Year",
+       y = "Close Price",
+       color = "Year") +
+  theme_minimal()
+
+
+```
+
+```{r}
+# Load necessary libraries
+library(lubridate)
+library(ggplot2)
+
+# Ensure 'prez' is numeric
+prez <- c(1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020, 2024)
+
+# Filter dataset for only the years in 'prez'
+filtered_ET <- ET |> filter(Yr %in% prez)
+
+# Filter the dataset to only include data from July (month 7) to December (month 12)
+filtered_ET <- filtered_ET |> filter(month(date) >= 7)
+
+# Create a new column for the day of the year (to handle continuous x-axis)
+filtered_ET <- filtered_ET |> mutate(day_of_year = yday(date), month_num = month(date))
+
+# Create the plot for year-over-year analysis with shading for November
+ggplot(filtered_ET, aes(x=day_of_year, y=close, color=factor(Yr), group=Yr)) +
+  geom_line(linewidth=1) +
+  
+  # Use annotate to add a shaded rectangle for November (days 305 to 334)
+  annotate("rect", xmin = 305, xmax = 334, ymin = -Inf, ymax = Inf, fill = "red", alpha = 0.3) +
+  
+  # Customize the x-axis to show the month numbers for the last six months
+  scale_x_continuous(breaks = c(182, 213, 244, 274, 305, 335),  # Approximate day of year for months Jul-Dec
+                     labels = c("7", "8", "9", "10", "11", "12")) +  # Month numbers for July to December
+  
+  # Turn off x-axis title
+  theme(axis.title.x = element_blank()) +
+  
+  labs(title = "Enegry Transfer(ET) Year-over-Year Stock Close Price",subtitle = " (Last Six Months)",       y = "Close Price",x="Month",  color = "Year") +
+  theme_minimal()
+
+
+```
+
+
 ```{r}
 ET |> ggplot(aes(x=date,y=close)) + geom_line() +
   geom_bbands(aes(high = high, low = low, close = close), ma_fun = SMA, n = 90)
