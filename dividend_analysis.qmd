@@ -1,0 +1,41 @@
+---
+title: TidyQuant Divident Analysis of Energry Transfer (ET)
+format: 
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: true
+---
+```{r}
+library(tidyverse)
+library(tidyquant)
+library(scales)
+library(plotly)
+```
+```{r}
+ET <- tq_get("ET", get = "stock.prices", from = " 1990-01-01")
+```
+# Begin Data Viz
+
+```{R}
+ggplot(ET) + geom_line(aes(x=date,y=open)) +
+  labs(title="Energy Transfer Opening Stock Price")
+
+```
+```{r}
+ET |> ggplot(aes(x=date,y=close)) + geom_line() +
+  geom_bbands(aes(high = high, low = low, close = close), ma_fun = SMA, n = 90)
+```
+```{r}
+ET |> filter(date >='2024-07-01') |> ggplot(aes(x=date,y=close)) + geom_line() +
+  geom_candlestick(aes(high = high, low = low, close = close,open=open)) + geom_ma(color = "darkgreen",linewidth=2)+ theme_light() +
+  labs(title="Energy Transfer: Candlestick Plot(w/ moving average)")
+```
+
+# Get Dividend 
+
+```{r}
+tq_get("ET", get = "dividends", from = " 1990-01-01") |>
+  ggplot() + geom_col(aes(x=date,y=value)) 
+
+```
