@@ -1,0 +1,182 @@
+---
+title: "Vanguard Income Funds"
+format: pptx
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(tidyquant)
+library(scales)
+library(plotly)
+library(lubridate)
+library(pracma)
+```
+
+```{r}
+rm(list=ls())
+funds <- tq_get(c("VDADX","VWINX","VWELX","VDIGX","ET"), get = "stock.prices", from = " 2000-08-01")
+```
+
+# Closing Prices
+
+```{r}
+ggplot(funds) + geom_line(aes(x=date,y=close,col=symbol,group=symbol)) +
+  labs(title="Vanguard Income Funds Closing Prices")
+```
+
+```{r}
+ggplot(funds) + geom_line(aes(x=date,y=close)) +
+  labs(title="Vanguard Income Funds Closing Prices") +
+  facet_wrap(~symbol)
+```
+
+# Energy Transfer(ET)
+
+```{r}
+ET <- funds |> filter(symbol =="ET")
+hi_low <-ggplot(ET) + geom_line(aes(x=date,y=high,col="High")) +
+  geom_line(aes(x=date,y=low,col="Low"))
+               
+ggplotly(hi_low)
+
+```
+
+```{r}
+
+# Rolling Means for Volume
+ET$short_close <- movavg(ET$close,n=20, type=c("s"))
+ET$medium_close <- movavg(ET$close,n=50, type=c("s"))
+ET$long_close <- movavg(ET$close,n=100, type=c("s"))
+```
+
+
+# Moving Average Summary(ET)
+
+```{r}
+ET|> select(close,short_close,medium_close,long_close) |> 
+  summary() 
+```
+
+# 
+
+```{r}
+mov_avg <- ggplot(ET) + geom_line(aes(x=date,y=close,col="Close")) +
+   geom_line(aes(x=date,y=short_close,col="20 Days")) +
+   geom_line(aes(x=date,y=long_close,col="100 Days"))
+ggplotly(mov_avg)
+```
+
+#  Bollinger Bands(ET)
+
+```{r}
+# Step 2: Calculate the 20-day Simple Moving Average (SMA) and the standard deviation
+bollinger_bands <- ET |> filter(date >='2024-01-01') %>%
+  mutate(SMA20 = rollmean(close, 20, fill = NA, align = 'right'), 
+         stddev = rollapply(close, 20, sd, fill = NA, align = 'right')) %>%
+  
+  # Step 3: Calculate the Upper and Lower Bollinger Bands
+  mutate(upper_band = SMA20 + (2 * stddev),
+         lower_band = SMA20 - (2 * stddev))
+
+# Step 4: View the data with Bollinger Bands
+head(bollinger_bands)
+
+# Optional: Step 5 - Visualize the Bollinger Bands
+bb <- bollinger_bands %>% 
+  ggplot(aes(x = date, y = close)) +
+  geom_line(aes(y = close), color = "blue") +
+  geom_line(aes(y = SMA20), color = "red") +
+  geom_ribbon(aes(ymin = lower_band, ymax = upper_band), alpha = 0.2) +
+  labs(title = "Bollinger Bands for ET",
+       x = "Date", y = "Price") +
+  theme_minimal()
+ggplotly(bb)
+```
+
+# Barchart
+
+```{r}
+ET %>%  filter(date >='2024-09-01') |>
+    ggplot(aes(x = date, y = close)) +
+    geom_barchart(aes(open = open, high = high, low = low, close = close)) +
+    geom_ma(color = "darkgreen") 
+    
+```
+
+# Vanguard Dividend Appreciation Index Fund (VDADX)
+
+This fund focuses on U.S. large-cap companies that have consistently increased dividends for at least 10 consecutive years, offering steady dividend income with a low expense ratio of 0.08%
+
+# High and Lows
+
+```{r}
+VDADX <- funds |> filter(symbol =="VDADX")
+hi_low <-ggplot(VDADX) + geom_line(aes(x=date,y=high,col="High")) +
+  geom_line(aes(x=date,y=low,col="Low"))
+               
+ggplotly(hi_low)
+
+```
+
+```{r}
+
+# Rolling Means for Volume
+VDADX$short_close <- movavg(VDADX$close,n=20, type=c("s"))
+VDADX$medium_close <- movavg(VDADX$close,n=50, type=c("s"))
+VDADX$long_close <- movavg(VDADX$close,n=100, type=c("s"))
+```
+
+
+# Moving Average Summary
+
+```{r}
+VDADX |> select(close,short_close,medium_close,long_close) |> 
+  summary() 
+```
+
+# 
+
+```{r}
+mov_avg <- ggplot(VDADX) + geom_line(aes(x=date,y=close,col="Close")) +
+   geom_line(aes(x=date,y=short_close,col="20 Days")) +
+   geom_line(aes(x=date,y=long_close,col="100 Days"))
+ggplotly(mov_avg)
+```
+
+#  Bollinger Bands The Hardway
+
+```{r}
+# Step 2: Calculate the 20-day Simple Moving Average (SMA) and the standard deviation
+bollinger_bands <- VDADX |> filter(date >='2024-01-01') %>%
+  mutate(SMA20 = rollmean(close, 20, fill = NA, align = 'right'), 
+         stddev = rollapply(close, 20, sd, fill = NA, align = 'right')) %>%
+  
+  # Step 3: Calculate the Upper and Lower Bollinger Bands
+  mutate(upper_band = SMA20 + (2 * stddev),
+         lower_band = SMA20 - (2 * stddev))
+
+# Step 4: View the data with Bollinger Bands
+head(bollinger_bands)
+
+# Optional: Step 5 - Visualize the Bollinger Bands
+bb <- bollinger_bands %>% 
+  ggplot(aes(x = date, y = close)) +
+  geom_line(aes(y = close), color = "blue") +
+  geom_line(aes(y = SMA20), color = "red") +
+  geom_ribbon(aes(ymin = lower_band, ymax = upper_band), alpha = 0.2) +
+  labs(title = "Bollinger Bands for ET",
+       x = "Date", y = "Price") +
+  theme_minimal()
+ggplotly(bb)
+```
+
+# Barchart
+
+```{r}
+VDADX %>%  filter(date >='2024-09-01') |>
+    ggplot(aes(x = date, y = close)) +
+    geom_barchart(aes(open = open, high = high, low = low, close = close)) +
+    geom_ma(color = "darkgreen") 
+    
+```
