@@ -1,0 +1,66 @@
+---
+title: Bollinger Bands(Genini AI)
+jupyter: python3
+format: html
+    
+---
+
+```{python}
+import yfinance as yf
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Download ET stock data
+ticker = "ET"
+data = yf.download(ticker, start="2023-10-19", end="2024-10-19")
+# Calculate 20 and 100-day moving averages
+data['MA20'] = data['Close'].rolling(window=20).mean()
+data['MA100'] = data['Close'].rolling(window=100).mean()
+```
+
+
+# Plot Close Price, 20/100 Day Moving Averages
+
+```{python}
+plt.figure(figsize=(12, 6))
+plt.plot(data['Close'], label='Close')
+plt.plot(data['MA20'], label='20-Day MA')
+plt.plot(data['MA100'], label='100-Day MA')
+# plt.fill_between(data.index, data['Upper Band'], data['Lower Band'], alpha=0.2)
+plt.legend()
+plt.title(f"{ticker} Stock Price with Moving Averages")
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.grid(True)
+#plt.xlim('2024-8-01', '2024-12-01')
+plt.show()
+```
+```{python}
+# Calculate Bollinger Bands
+def bollinger_bands(df, window=20, k=2):
+    rolling_mean = df['Close'].rolling(window=window).mean()
+    rolling_std = df['Close'].rolling(window=window).std()
+    upper_band = rolling_mean + k * rolling_std
+    lower_band = rolling_mean - k * rolling_std
+    return upper_band, lower_band
+
+upper_band, lower_band = bollinger_bands(data)
+data['Upper Band'] = upper_band
+data['Lower Band'] = lower_band
+```
+
+# Plot close price, moving  20 Day averages, and Bollinger Bands
+
+```{python}
+plt.figure(figsize=(12, 6))
+plt.plot(data['Close'], label='Close')
+plt.plot(data['MA20'], label='20-Day MA')
+plt.plot(data['MA100'], label='100-Day MA')
+plt.fill_between(data.index, data['Upper Band'], data['Lower Band'], alpha=0.2)
+plt.legend()
+plt.title(f"{ticker} Stock Price with Moving Averages and Bollinger Bands")
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.grid(True)
+plt.show()
+```
