@@ -54,7 +54,7 @@ ggplot(bnd) +
 
 ```{r}
 # ---- Plot 1: Candlestick Only ----
-p1 <- ggplot(bnd_data, aes(x = date)) +
+p1 <- ggplot(bnd, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
   geom_rect(aes(
     xmin = date - 0.5, xmax = date + 0.5,
@@ -67,8 +67,8 @@ p1 <- ggplot(bnd_data, aes(x = date)) +
   theme_minimal()
 
 # ---- Plot 2: Bollinger Bands ----
-bnd_bb <- bnd_data %>%
-  tq_mutate(select = close, mutate_fun = BBands)
+bnd_bb <- bnd %>%
+  tq_mutate(select = close, mutate_fun = BBands) |> na.omit()
 
 p2 <- ggplot(bnd_bb, aes(x = date)) +
   geom_ribbon(aes(ymin = dn, ymax = up), fill = "lightblue", alpha = 0.3) +
@@ -108,7 +108,7 @@ ggplot(bndx) +
 ```{r}
 
 # ---- Plot 1: Candlestick Only ----
-p1 <- ggplot(bndx_data, aes(x = date)) +
+p1 <- ggplot(bndx, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
   geom_rect(aes(
     xmin = date - 0.5, xmax = date + 0.5,
@@ -121,8 +121,8 @@ p1 <- ggplot(bndx_data, aes(x = date)) +
   theme_minimal()
 
 # ---- Plot 2: Bollinger Bands ----
-bnd_bb <- bndx_data %>%
-  tq_mutate(select = close, mutate_fun = BBands)
+bnd_bb <- bndx %>%
+  tq_mutate(select = close, mutate_fun = BBands) |> na.omit()
 
 p2 <- ggplot(bnd_bb, aes(x = date)) +
   geom_ribbon(aes(ymin = dn, ymax = up), fill = "lightblue", alpha = 0.3) +
@@ -159,7 +159,7 @@ ggplot(vti) +
 ```
 ```{r}
 # ---- Plot 1: Candlestick Only ----
-p1 <- ggplot(vti_data, aes(x = date)) +
+p1 <- ggplot(vti, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
   geom_rect(aes(
     xmin = date - 0.5, xmax = date + 0.5,
@@ -172,8 +172,8 @@ p1 <- ggplot(vti_data, aes(x = date)) +
   theme_minimal()
 
 # ---- Plot 2: Bollinger Bands ----
-bnd_bb <- vti_data %>%
-  tq_mutate(select = close, mutate_fun = BBands)
+bnd_bb <- vti %>%
+  tq_mutate(select = close, mutate_fun = BBands) |> na.omit()
 
 p2 <- ggplot(bnd_bb, aes(x = date)) +
   geom_ribbon(aes(ymin = dn, ymax = up), fill = "lightblue", alpha = 0.3) +
@@ -210,7 +210,7 @@ ggplot(vxus) +
 ```
 ```{r}
 # ---- Plot 1: Candlestick Only ----
-p1 <- ggplot(vxus_data, aes(x = date)) +
+p1 <- ggplot(vxus, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
   geom_rect(aes(
     xmin = date - 0.5, xmax = date + 0.5,
@@ -224,8 +224,8 @@ p1 <- ggplot(vxus_data, aes(x = date)) +
 
 # ---- Plot 2: Bollinger Bands ----
 
-bnd_bb <- vxus_data %>%
-  tq_mutate(select = close, mutate_fun = BBands)
+bnd_bb <- vxus %>%
+  tq_mutate(select = close, mutate_fun = BBands) |> na.omit()
 
 p2 <- ggplot(bnd_bb, aes(x = date)) +
   geom_ribbon(aes(ymin = dn, ymax = up), fill = "lightblue", alpha = 0.3) +
