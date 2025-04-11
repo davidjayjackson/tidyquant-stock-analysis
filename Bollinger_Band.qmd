@@ -10,67 +10,49 @@ echo: false
 # Load packages
 library(tidyquant)
 library(tidyverse)
+library(alphavantager)
+library(pracma)
 library(patchwork)  # Optional, for combining plots
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
+theme_set(theme_light())
+```
+```{r}
+av_api_key("35RWNNYNVVW23JS1")
+
 ```
 
-#BND
-
-<!-- ```{r} -->
-
-<!-- # Fetch YTD data -->
-<!-- bnd_data <- tq_get("BND", from = as.Date(format(Sys.Date(), "%Y-01-01"))) -->
-
-<!-- # Calculate Bollinger Bands -->
-<!-- bnd_bb <- bnd_data %>% -->
-<!--   tq_mutate(select = close, mutate_fun = BBands) -->
-
-<!-- # Plot with filled bands -->
-<!-- ggplot(bnd_bb, aes(x = date)) + -->
-<!--   geom_ribbon(aes(ymin = dn, ymax = up), fill = "lightblue", alpha = 0.3) + -->
-<!--   geom_line(aes(y = close), color = "blue", size = 0.8) + -->
-<!--   geom_line(aes(y = up), color = "red", linetype = "dashed") + -->
-<!--   geom_line(aes(y = dn), color = "red", linetype = "dashed") + -->
-<!--   geom_line(aes(y = mavg), color = "darkgreen", linetype = "dotdash") + -->
-<!--   labs( -->
-<!--     title = "BND ETF - Bollinger Bands (YTD)", -->
-<!--     x = "Date", y = "Closing Price" -->
-<!--   ) + -->
-<!--   theme_minimal() -->
-<!-- ``` -->
-<!-- ```{r} -->
-
-<!-- # Get YTD stock data -->
-<!-- bnd_data <- tq_get("BND", from = as.Date(format(Sys.Date(), "%Y-01-01"))) -->
-
-<!-- # Compute Bollinger Bands -->
-<!-- bnd_bb <- bnd_data %>% -->
-<!--   tq_mutate(select = close, mutate_fun = BBands) -->
-
-<!-- # Candlestick + Bollinger Bands -->
-<!-- ggplot(bnd_bb, aes(x = date)) + -->
-<!--   # Candlestick chart -->
-<!--   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +  # wicks -->
-<!--   geom_rect(aes(xmin = date - 0.5, xmax = date + 0.5, -->
-<!--                 ymin = pmin(open, close), -->
-<!--                 ymax = pmax(open, close), -->
-<!--                 fill = open < close), color = "black") +                    # candle body -->
-<!--   # Bollinger Bands -->
-<!--   geom_line(aes(y = mavg), color = "darkgreen", linetype = "dotdash") + -->
-<!--   geom_line(aes(y = up), color = "red", linetype = "dashed") + -->
-<!--   geom_line(aes(y = dn), color = "red", linetype = "dashed") + -->
-<!--   scale_fill_manual(values = c("TRUE" = "green", "FALSE" = "red"), guide = "none") + -->
-<!--   labs( -->
-<!--     title = "BND ETF - Candlestick Chart with Bollinger Bands (YTD)", -->
-<!--     x = "Date", y = "Price" -->
-<!--   ) + -->
-<!--   theme_minimal() -->
-<!-- ``` -->
+# BND
 
 ```{r}
+rm(list=ls())
+
+bnd<- tq_get("BND",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
 
 # Get YTD data
-bnd_data <- tq_get("BND", from = as.Date(format(Sys.Date(), "%Y-01-01")))
+# bnd_data <- tq_get("BND", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) # |> rename(date = timestamp)
 
+# bnd_sma <- tq_get( "BND", get = "stock.prices", av_fun = "SMA",interval = "daily",time_period = 30,series_type = "close" )
+bnd$rolling_50d <- movavg(bnd$close,50,type=c("s"))
+bnd$rolling_25d <- movavg(bnd$close,7,type=c("s"))
+# bnd_combined <- left_join(bnd, bnd_sma, by = "date", suffix = c("", "_sma"))
+
+
+```
+```{r}
+
+ggplot(bnd) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_line(aes(x=date,y = rolling_25d,colour = "25d_MA"),linewidth=1) +
+ geom_line(aes(x=date,y =rolling_50d,colour = "50d_MA"),linewidth=1) +
+  labs(title = "BND with 7/50 Day SMA", y = "Price", x = "Date")
+
+
+ggplot(bnd) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_smooth(aes(x=date,y=close,colour = "Loess"),mothod=loess,span=.5)
+```
+
+```{r}
 # ---- Plot 1: Candlestick Only ----
 p1 <- ggplot(bnd_data, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
@@ -104,9 +86,26 @@ p1 / p2  # stacked vertically, or use p1 + p2 for side-by-side
 # BNDX
 
 ```{r}
-
 # Get YTD data
-bndx_data <- tq_get("BNDX", from = as.Date(format(Sys.Date(), "%Y-01-01")))
+# bndx_data <- tq_get("BNDX", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
+
+bndx<- tq_get("BNDX",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
+bndx$rolling_50d <- movavg(bndx$close,50,type=c("s"))
+bndx$rolling_7d <- movavg(bndx$close,7,type=c("s"))
+
+ggplot(bndx) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_line(aes(x=date,y = rolling_7d,colour = "7d_MA"),linewidth=1) +
+ geom_line(aes(x=date,y =rolling_50d,colour = "50d_MA"),linewidth=1) +
+  labs(title = "BND with 7/50 Day SMA", y = "Price", x = "Date")
+
+ggplot(bndx) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_smooth(aes(x=date,y=close,colour = "Loess"),mothod=loess,span=.5)
+
+```
+
+```{r}
 
 # ---- Plot 1: Candlestick Only ----
 p1 <- ggplot(bndx_data, aes(x = date)) +
@@ -140,12 +139,25 @@ p1 / p2 + plot_layout(heights = c(4, 4)) # stacked vertically, or use p1 + p2 fo
 
 # VTI
 
-
 ```{r}
+# vti_data <- tq_get("VTI", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
 
-# Get YTD data
-vti_data <- tq_get("VTI", from = as.Date(format(Sys.Date(), "%Y-01-01")))
+vti<- tq_get("vti",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
+vti$rolling_50d <- movavg(vti$close,50,type=c("s"))
+vti$rolling_7d <- movavg(vti$close,7,type=c("s"))
 
+ggplot(vti) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_line(aes(x=date,y = rolling_7d,colour = "7d_MA"),linewidth=1) +
+ geom_line(aes(x=date,y =rolling_50d,colour = "50d_MA"),linewidth=1) +
+  labs(title = "VTI with 7/50 Day SMA", y = "Price", x = "Date")
+
+ggplot(vti) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_smooth(aes(x=date,y=close,colour = "Loess"),mothod=loess,span=.5)
+
+```
+```{r}
 # ---- Plot 1: Candlestick Only ----
 p1 <- ggplot(vti_data, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
@@ -178,12 +190,25 @@ p1 / p2 + plot_layout(heights = c(4, 4)) # stacked vertically, or use p1 + p2 fo
 
 # VXUS
 
-
 ```{r}
 
 # Get YTD data
-vxus_data <- tq_get("VXUS", from = as.Date(format(Sys.Date(), "%Y-01-01")))
+# vxus_data <- tq_get("VXUS", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
+vxus<- tq_get("VXUS",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
+vxus$rolling_50d <- movavg(vxus$close,50,type=c("s"))
+vxus$rolling_7d <- movavg(vxus$close,7,type=c("s"))
 
+ggplot(vxus) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_line(aes(x=date,y = rolling_7d,colour = "7d_MA"),linewidth=1) +
+ geom_line(aes(x=date,y =rolling_50d,colour = "50d_MA"),linewidth=1) +
+  labs(title = "VXUS with 7/50 Day SMA", y = "Price", x = "Date")
+
+ggplot(vxus) +
+  geom_line(aes(x=date,y = close,colour = "Close"),linewidth=2) +
+  geom_smooth(aes(x=date,y=close,colour = "Loess"),mothod=loess,span=.5)
+```
+```{r}
 # ---- Plot 1: Candlestick Only ----
 p1 <- ggplot(vxus_data, aes(x = date)) +
   geom_segment(aes(xend = date, y = low, yend = high), color = "black") +
