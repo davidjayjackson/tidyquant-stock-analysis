@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
 theme_set(theme_light())
 ```
 ```{r}
-av_api_key("35RWNNYNVVW23JS1")
+av_api_key("<Put API Key Here>")
 
 ```
 
