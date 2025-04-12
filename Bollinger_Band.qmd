@@ -29,7 +29,7 @@ rm(list=ls())
 bnd<- tq_get("BND",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
 
 # Get YTD data
-# bnd_data <- tq_get("BND", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) # |> rename(date = timestamp)
+# bnd <- tq_get("BND", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) # |> rename(date = timestamp)
 
 # bnd_sma <- tq_get( "BND", get = "stock.prices", av_fun = "SMA",interval = "daily",time_period = 30,series_type = "close" )
 bnd$rolling_50d <- movavg(bnd$close,50,type=c("s"))
@@ -87,7 +87,7 @@ p1 / p2  # stacked vertically, or use p1 + p2 for side-by-side
 
 ```{r}
 # Get YTD data
-# bndx_data <- tq_get("BNDX", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
+# bndx <- tq_get("BNDX", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
 
 bndx<- tq_get("BNDX",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
 bndx$rolling_50d <- movavg(bndx$close,50,type=c("s"))
@@ -140,7 +140,7 @@ p1 / p2 + plot_layout(heights = c(4, 4)) # stacked vertically, or use p1 + p2 fo
 # VTI
 
 ```{r}
-# vti_data <- tq_get("VTI", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
+# vti <- tq_get("VTI", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
 
 vti<- tq_get("vti",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
 vti$rolling_50d <- movavg(vti$close,50,type=c("s"))
@@ -193,7 +193,7 @@ p1 / p2 + plot_layout(heights = c(4, 4)) # stacked vertically, or use p1 + p2 fo
 ```{r}
 
 # Get YTD data
-# vxus_data <- tq_get("VXUS", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
+# vxus <- tq_get("VXUS", get = "alphavantage", av_fun = "TIME_SERIES_DAILY", from = as.Date(format(Sys.Date(), "%Y-01-01"))) |> rename(date = timestamp)
 vxus<- tq_get("VXUS",get="stock.prices" , from = as.Date(format(Sys.Date(), "%Y-01-01"))  )
 vxus$rolling_50d <- movavg(vxus$close,50,type=c("s"))
 vxus$rolling_7d <- movavg(vxus$close,7,type=c("s"))
